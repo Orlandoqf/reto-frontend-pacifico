@@ -1,6 +1,6 @@
 import { After, AfterAll, Before, BeforeAll, Status, setDefaultTimeout } from '@cucumber/cucumber';
 import { Browser, chromium } from '@playwright/test';
-import { CustomWorld } from './world';
+import { customworld } from './world';
 
 setDefaultTimeout(30 * 1000);
 
@@ -12,13 +12,13 @@ BeforeAll(async function () {
 });
 
 // Cada escenario usa su propio contexto, así no se comparte la sesión ni el carrito
-Before(async function (this: CustomWorld) {
+Before(async function (this: customworld) {
   this.context = await browser.newContext();
   this.page = await this.context.newPage();
   this.crearPaginas();
 });
 
-After(async function (this: CustomWorld, { result }) {
+After(async function (this: customworld, { result }) {
   // Si el escenario falla se adjunta una captura al reporte
   if (result?.status === Status.FAILED) {
     const captura = await this.page.screenshot({ fullPage: true });

@@ -24,12 +24,12 @@ Además agregué escenarios extra: quitar un producto del carrito y validar los 
 
 ## 3. Patrón de diseño: Page Object Model
 
-Cada pantalla de la aplicación tiene su clase en `src/pages`:
+Cada pantalla de la aplicación tiene dos clases: una con sus localizadores en `src/locators` y otra con sus acciones en `src/pages`.
 
-- `BasePage`: clase padre con el `page` de Playwright, la URL base y el título que comparten todas las pantallas.
-- `LoginPage`, `InventoryPage`, `CartPage` y `CheckoutPage`: tienen los localizadores de su pantalla y los métodos con las acciones (por ejemplo `iniciarSesion()`, `agregarProducto()`, `llenarDatos()`).
+- `src/locators`: `baselocators` tiene el título que comparten todas las pantallas; `loginlocators`, `inventorylocators`, `cartlocators` y `checkoutlocators` heredan de ella y definen los localizadores de su pantalla.
+- `src/pages`: `basepage` es la clase padre con el `page` de Playwright, la URL base y los localizadores de la pantalla (`locators`). `loginpage`, `inventorypage`, `cartpage` y `checkoutpage` solo tienen los métodos con las acciones (por ejemplo `iniciarSesion()`, `agregarProducto()`, `llenarDatos()`).
 
-Así los step definitions no tienen selectores, solo llaman a los métodos de las páginas y hacen las validaciones. Si cambia un selector, solo se cambia en la clase de la página.
+Así los step definitions no tienen selectores: llaman a los métodos de las páginas y validan usando `pagina.locators`. Si cambia un selector, solo se cambia en su clase de `src/locators`.
 
 ## 4. Cómo usé Cucumber
 
@@ -40,6 +40,7 @@ Así los step definitions no tienen selectores, solo llaman a los métodos de la
 - Usé tags: `@happypath` / `@unhappypath` por tipo de caso y `@login` / `@carrito` / `@compra` por feature.
 - El **World** de Cucumber (`src/support/world.ts`) guarda la página y los page objects de cada escenario para compartirlos entre los steps.
 - Los **hooks** (`src/support/hooks.ts`) abren el navegador una vez y crean un contexto nuevo por escenario, así cada escenario empieza limpio (sin sesión ni carrito de otro escenario). Si un escenario falla se toma una captura y se adjunta al reporte.
+- Los mismos features y steps también se pueden ejecutar con el runner de Playwright gracias a **playwright-bdd** (`npm run test:pw`), lo que da acceso al reporte HTML de Playwright y a las trazas de los escenarios que fallan. `src/support/bdd.ts` registra los steps en Cucumber o en playwright-bdd según cuál los ejecute, así no hay steps duplicados.
 
 ## 5. Validaciones
 

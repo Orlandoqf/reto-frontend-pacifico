@@ -1,18 +1,10 @@
-import { Locator, Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { Page } from '@playwright/test';
+import { basepage } from './basepage';
+import { loginlocators } from '../locators/loginlocators';
 
-export class LoginPage extends BasePage {
-  readonly inputUsuario: Locator;
-  readonly inputClave: Locator;
-  readonly botonLogin: Locator;
-  readonly mensajeError: Locator;
-
+export class loginpage extends basepage<loginlocators> {
   constructor(page: Page) {
-    super(page);
-    this.inputUsuario = page.locator('[data-test="username"]');
-    this.inputClave = page.locator('[data-test="password"]');
-    this.botonLogin = page.locator('[data-test="login-button"]');
-    this.mensajeError = page.locator('[data-test="error"]');
+    super(page, new loginlocators(page));
   }
 
   async abrir() {
@@ -20,8 +12,8 @@ export class LoginPage extends BasePage {
   }
 
   async iniciarSesion(usuario: string, clave: string) {
-    await this.inputUsuario.fill(usuario);
-    await this.inputClave.fill(clave);
-    await this.botonLogin.click();
+    await this.locators.inputUsuario.fill(usuario);
+    await this.locators.inputClave.fill(clave);
+    await this.locators.botonLogin.click();
   }
 }

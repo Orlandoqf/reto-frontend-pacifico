@@ -7,6 +7,7 @@ Pruebas automatizadas de la tienda Sauce Demo (https://www.saucedemo.com/) usand
 - Node.js 18 (o superior)
 - Playwright 1.64
 - Cucumber JS 13
+- playwright-bdd 9 (para ejecutar los features con el runner de Playwright)
 - TypeScript 5 (con ts-node)
 
 ## Instalación
@@ -54,17 +55,49 @@ npx cucumber-js features/compra.feature
 ```
 
 ```bash
-npx cucumber-js --tags @login
+npx cucumber-js --tags "@login"
 ```
+
+> En PowerShell el tag debe ir entre comillas: sin ellas, `@login` se interpreta como una variable (splatting) y el comando falla.
+
+### Ejecutar con Playwright (playwright-bdd)
+
+Los mismos features y steps también se pueden ejecutar con el runner de Playwright. `bddgen` convierte los `.feature` en tests de Playwright (en `.features-gen`) y luego `playwright test` los ejecuta:
+
+```bash
+npm run test:pw
+```
+
+```bash
+npm run test:pw:headed
+npm run test:pw:happypath
+npm run test:pw:unhappypath
+```
+
+O directamente con `npx` (los tags se filtran con `--grep`):
+
+```powershell
+npx bddgen; npx playwright test --grep "@happypath"
+```
+
+> Hay que ejecutar `npx bddgen` antes de `npx playwright test` cada vez que cambie un `.feature` o un step.
 
 ## Reporte
 
-Después de ejecutar, los reportes se generan en:
+Con Cucumber (`npm test`), los reportes se generan en:
 
 - `reports/cucumber-report.html` (reporte para abrir en el navegador)
 - `reports/cucumber-report.json`
 
 Si un escenario falla, se adjunta una captura de pantalla en el reporte HTML.
+
+Con Playwright (`npm run test:pw`), el reporte HTML de Playwright se genera en `playwright-report/` y se abre con:
+
+```bash
+npm run report:pw
+```
+
+Si un escenario falla, el reporte incluye la captura de pantalla y la traza (trace), que se puede abrir desde el mismo reporte para ver la ejecución paso a paso.
 
 ## Estructura del proyecto
 
@@ -76,20 +109,31 @@ features                      -> escenarios en Gherkin (en español)
 src
 ├── data
 │   └── usuarios.ts           -> credenciales de prueba
-├── pages                     -> Page Objects
-│   ├── BasePage.ts
-│   ├── LoginPage.ts
-│   ├── InventoryPage.ts
-│   ├── CartPage.ts
-│   └── CheckoutPage.ts
-├── steps                     -> step definitions, uno por feature
+├── locators                  -> localizadores de cada pantalla
+│   ├── baselocators.ts
+│   ├── loginlocators.ts
+│   ├── inventorylocators.ts
+│   ├── cartlocators.ts
+│   └── checkoutlocators.ts
+├── pages                     -> Page Objects (solo acciones)
+│   ├── basepage.ts
+│   ├── loginpage.ts
+│   ├── inventorypage.ts
+│   ├── cartpage.ts
+│   └── checkoutpage.ts
+├── playwright
+│   └── fixtures.ts           -> World de playwright-bdd (equivalente a world.ts)
+├── steps                     -> step definitions, uno por feature (sirven para los dos runners)
 │   ├── login.steps.ts
 │   ├── carrito.steps.ts
 │   └── compra.steps.ts
 └── support
+    ├── bdd.ts                -> registra los steps en Cucumber o en playwright-bdd
+    ├── escenario.ts          -> lo que los steps usan del escenario (page y page objects)
     ├── world.ts              -> World de Cucumber (page y page objects del escenario)
     └── hooks.ts              -> abre/cierra el navegador y toma captura si falla
 cucumber.js                   -> configuración de Cucumber
+playwright.config.ts          -> configuración de Playwright y playwright-bdd
 ```
 
 ## Escenarios automatizados
